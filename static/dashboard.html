@@ -1,0 +1,28 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BarberFlow — Tableau de bord</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="/static/style.css">
+<style>.item{margin-top:12px;display:grid;gap:10px}.acts{display:flex;gap:8px;flex-wrap:wrap}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:24px 0}.stats b{font-size:28px;display:block;letter-spacing:-.03em}
+.chips{display:flex;gap:8px;overflow-x:auto;margin:12px 0}.chips .btn{white-space:nowrap}.chips .on{background:var(--fg);color:var(--bg)}small{color:var(--mut)}</style></head><body>
+<div class="wrap"><div class="row"><span class="logo">BarberFlow · <span id="nm"></span></span><a class="btn ghost" href="/">Vue client</a></div>
+<div class="stats"><div class="card"><b id="s1">0</b><small>Nouveaux</small></div><div class="card"><b id="s2">0</b><small>Aujourd'hui</small></div><div class="card"><b id="s3">0</b><small>Confirmés</small></div></div>
+<input id="q" placeholder="Rechercher un client ou une prestation…"><div class="chips" id="chips"></div><div id="list"></div></div>
+<script>
+const b=new URLSearchParams(location.search).get("b")||"atelier-nord",ST=["Nouveau","Confirmé","Terminé","Annulé"],today=new Date().toISOString().slice(0,10);
+let key=sessionStorage.bf||prompt("Clé d'accès (démo : demo1234)")||"",data=[],ids=null,flt="Tous";
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const toast=t=>{const e=document.createElement("div");e.className="toast";e.textContent=t;document.body.append(e);setTimeout(()=>e.remove(),3500)};
+async function api(u,o={}){const r=await fetch(u+"?b="+b,{...o,headers:{"X-Key":key,"Content-Type":"application/json"}});
+ if(r.status==401){sessionStorage.removeItem("bf");document.body.innerHTML="<div class=wrap><p>Clé invalide. Rechargez la page.</p></div>";throw 0}sessionStorage.bf=key;return r.json()}
+async function load(){const d=await api("/api/dashboard/requests");nm.textContent=d.barber;
+ const n=d.requests.filter(r=>ids&&!ids.has(r.id));if(n.length)toast(`🔔 Nouvelle demande : ${n[0].prenom} ${n[0].nom}`);
+ ids=new Set(d.requests.map(r=>r.id));data=d.requests;render()}
+function render(){const q=document.getElementById("q").value.toLowerCase();
+ s1.textContent=data.filter(r=>r.statut=="Nouveau").length;s2.textContent=data.filter(r=>r.date==today&&r.statut!="Annulé").length;s3.textContent=data.filter(r=>r.statut=="Confirmé").length;
+ chips.innerHTML=["Tous",...ST].map(s=>`<button class="btn ghost ${s==flt?"on":""}" onclick="flt='${s}';render()">${s}</button>`).join("");
+ const rows=data.filter(r=>(flt=="Tous"||r.statut==flt)&&(r.nom+r.prenom+r.prestation).toLowerCase().includes(q));
+ list.innerHTML=rows.map(r=>`<div class="card item"><div class="row"><b>${esc(r.prenom)} ${esc(r.nom)}</b><span class="tag ${r.statut}">${r.statut}</span></div>
+ <div>${esc(r.prestation)} · ${esc(r.date)} à ${esc(r.heure)}</div><small>${esc(r.telephone)} · ${esc(r.email)}${r.commentaire?" · “"+esc(r.commentaire)+"”":""}</small>
+ <div class="acts">${r.statut=="Nouveau"?`<button class="btn" onclick="set(${r.id},'Confirmé')">Confirmer</button>`:""}${r.statut=="Confirmé"?`<button class="btn" onclick="set(${r.id},'Terminé')">Terminé</button>`:""}
+ ${["Nouveau","Confirmé"].includes(r.statut)?`<button class="btn ghost" onclick="set(${r.id},'Annulé')">Annuler</button>`:""}</div></div>`).join("")||"<p><small>Aucune demande.</small></p>"}
+async function set(id,statut){data.find(r=>r.id==id).statut=statut;render();await api("/api/dashboard/requests/"+id,{method:"PATCH",body:JSON.stringify({statut})});toast("Statut mis à jour"+(statut=="Confirmé"||statut=="Annulé"?" · client notifié":""))}
+document.getElementById("q").oninput=render;load();setInterval(load,5000);
+</script></body></html>

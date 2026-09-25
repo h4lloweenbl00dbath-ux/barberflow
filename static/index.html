@@ -1,0 +1,21 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BarberFlow — Vos rendez-vous, sans effort</title><link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="/static/style.css"></head><body>
+<div class="wrap"><div class="row"><span class="logo">BarberFlow</span><a class="btn ghost" href="/dashboard">Espace barbier</a></div>
+<section class="hero"><h1>Vos rendez-vous,<br>sans effort.</h1><p class="sub">Centralisez les demandes de vos clients, confirmez en un geste, et laissez BarberFlow s'occuper des messages.</p><a class="btn" href="#rdv">Prendre rendez-vous</a></section>
+<section id="rdv" class="card"><div id="box"><h2 style="margin:0 0 4px;letter-spacing:-.02em">Votre demande</h2><p id="who" style="color:var(--mut);margin:0 0 24px"></p>
+<form id="f" class="grid" novalidate><div><label>Prénom</label><input name="prenom" autocomplete="given-name"></div><div><label>Nom</label><input name="nom" autocomplete="family-name"></div>
+<div><label>Téléphone</label><input name="telephone" type="tel" autocomplete="tel"></div><div><label>Email</label><input name="email" type="email" autocomplete="email"></div>
+<div class="full"><label>Prestation</label><select name="prestation"></select></div><div><label>Date</label><input name="date" type="date"></div><div><label>Heure</label><input name="heure" type="time" step="900"></div>
+<div class="full"><label>Commentaire (facultatif)</label><textarea name="commentaire" rows="2"></textarea></div><div class="full"><button class="btn" style="width:100%">Envoyer ma demande</button></div></form></div></section>
+<p style="color:var(--mut);font-size:12px;text-align:center;padding:24px 0">Démo — utilisez uniquement des données fictives.</p></div>
+<script>
+const b=new URLSearchParams(location.search).get("b")||"atelier-nord",f=document.getElementById("f");
+fetch("/api/barbers/"+b).then(r=>r.json()).then(d=>{who.textContent="Chez "+d.name;f.prestation.innerHTML=d.services.map(s=>`<option>${s}</option>`).join("")});
+f.date.min=new Date().toISOString().slice(0,10);
+f.onsubmit=async e=>{e.preventDefault();const body=Object.fromEntries(new FormData(f));
+ const r=await fetch(`/api/barbers/${b}/requests`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+ f.querySelectorAll(".bad").forEach(x=>x.classList.remove("bad"));
+ if(r.ok){box.innerHTML=`<h2 style="margin:0 0 8px">Demande envoyée ✓</h2><p style="color:var(--mut)">Une confirmation a été envoyée à ${body.email.replace(/</g,"&lt;")}. Le barbier reviendra vers vous rapidement.</p>`}
+ else{(await r.json()).fields.forEach(n=>f[n]?.classList.add("bad"))}};
+</script></body></html>
