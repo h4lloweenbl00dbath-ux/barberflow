@@ -16,3 +16,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--fg)}.bad{border-color
 .Nouveau{background:var(--fg);color:var(--bg)}.Confirmé{border-color:var(--fg)}.Terminé,.Annulé{color:var(--mut)}
 .row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:12px 20px;border-radius:999px;font-size:14px;animation:in .3s}
+.link{color:var(--fg);text-decoration:underline;font-size:14px}
+footer{color:var(--mut);font-size:12px;text-align:center;padding:24px 0}
+footer a{color:var(--mut)}
+.err{color:#c0392b;font-size:14px;margin-top:8px}

@@ -1,0 +1,18 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Connexion — BarberFlow</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="/static/style.css"></head><body>
+<div class="wrap" style="max-width:420px;padding-top:80px"><p class="logo" style="text-align:center;margin-bottom:32px">BarberFlow</p>
+<div class="card"><h2 style="margin:0 0 20px;letter-spacing:-.02em">Connexion barbier</h2>
+<form id="f" style="display:grid;gap:14px">
+<div><label>Email</label><input name="email" type="email" autocomplete="email"></div>
+<div><label>Mot de passe</label><input name="password" type="password" autocomplete="current-password"></div>
+<div id="err" class="err"></div>
+<button class="btn" style="width:100%">Se connecter</button>
+</form>
+<p style="margin:18px 0 0;font-size:14px;color:var(--mut)">Pas encore de compte ? <a class="link" href="/signup">Créer mon espace</a></p>
+</div></div>
+<footer><a href="/mentions-legales">Mentions légales</a> · <a href="/cgu">CGU</a> · <a href="/confidentialite">Confidentialité</a></footer>
+<script>
+f.onsubmit=async e=>{e.preventDefault();err.textContent="";const body=Object.fromEntries(new FormData(f));
+ const r=await fetch("/api/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+ if(r.ok){location.href="/dashboard"}else{err.textContent="Email ou mot de passe incorrect."}};
+</script></body></html>

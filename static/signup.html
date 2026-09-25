@@ -1,0 +1,24 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Créer mon espace — BarberFlow</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="/static/style.css"></head><body>
+<div class="wrap" style="max-width:460px;padding-top:60px"><p class="logo" style="text-align:center;margin-bottom:32px">BarberFlow</p>
+<div class="card"><h2 style="margin:0 0 4px;letter-spacing:-.02em">Créer mon espace</h2>
+<p style="color:var(--mut);font-size:14px;margin:0 0 20px">Chaque barbier a sa propre page client et son propre dashboard.</p>
+<form id="f" style="display:grid;gap:14px">
+<div><label>Nom du salon</label><input name="name" placeholder="Ex : Atelier Nord"></div>
+<div><label>Adresse dans le lien (sans espace ni accent)</label><input name="slug" placeholder="ex : atelier-nord"></div>
+<div><label>Email</label><input name="email" type="email" autocomplete="email"></div>
+<div><label>Mot de passe (8 caractères minimum)</label><input name="password" type="password" autocomplete="new-password"></div>
+<div id="err" class="err"></div>
+<button class="btn" style="width:100%">Créer mon espace</button>
+</form>
+<p style="margin:18px 0 0;font-size:14px;color:var(--mut)">Déjà un compte ? <a class="link" href="/login">Se connecter</a></p>
+</div></div>
+<footer><a href="/mentions-legales">Mentions légales</a> · <a href="/cgu">CGU</a> · <a href="/confidentialite">Confidentialité</a></footer>
+<script>
+f.slug.oninput=()=>{f.slug.value=f.slug.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"")};
+f.onsubmit=async e=>{e.preventDefault();err.textContent="";const body=Object.fromEntries(new FormData(f));
+ const r=await fetch("/api/auth/signup",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+ if(r.ok){location.href="/dashboard"}
+ else{const d=await r.json();
+  err.textContent=d.error==="taken"?"Cette adresse ou cet email est déjà utilisé.":"Merci de vérifier les champs (mot de passe : 8 caractères minimum).";}};
+</script></body></html>
